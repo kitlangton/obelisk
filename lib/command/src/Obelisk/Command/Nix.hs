@@ -158,7 +158,7 @@ instance Default NixCmd where
   def = NixCmd_Build def
 
 nixCmd :: MonadObelisk m => NixCmd -> m FilePath
-nixCmd cmdCfg = withSpinner' ("Running " <> cmd <> " on " <> desc) (Just $ const $ "Built " <> desc) $ do
+nixCmd cmdCfg = withSpinner' ("Running " <> cmd <> desc) (Just $ const $ "Built " <> desc) $ do
   output <- readProcessAndLogStderr Debug $ proc (T.unpack cmd) $ options
   -- Remove final newline that Nix appends
   Just (outPath, '\n') <- pure $ T.unsnoc output
