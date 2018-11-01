@@ -33,6 +33,7 @@ import Control.Lens
 import Data.Bool (bool)
 import Data.Default
 import Data.List (intercalate)
+import Data.Maybe
 import Data.Monoid ((<>))
 import qualified Data.Text as T
 import System.Process (proc)
