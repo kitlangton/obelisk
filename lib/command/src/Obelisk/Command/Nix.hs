@@ -42,7 +42,7 @@ import Obelisk.CliApp
 
 -- | What to build
 data Target = Target
-  { _target_path :: FilePath
+  { _target_path :: Maybe FilePath
   , _target_attr :: Maybe String
   , _target_expr :: Maybe String
   }
@@ -50,7 +50,7 @@ makeClassy ''Target
 
 instance Default Target where
   def = Target
-    { _target_path = "."
+    { _target_path = Just "."
     , _target_attr = Nothing
     , _target_expr = Nothing
     }
@@ -85,7 +85,7 @@ instance Default NixCommonConfig where
   def = NixCommonConfig def mempty mempty
 
 runNixCommonConfig :: NixCommonConfig -> [FilePath]
-runNixCommonConfig cfg = mconcat [[path], attrArg, exprArg, args, buildersArg]
+runNixCommonConfig cfg = mconcat [maybeToList path, attrArg, exprArg, args, buildersArg]
   where
     path = _target_path $ _nixCmdConfig_target cfg
     attr = _target_attr $ _nixCmdConfig_target cfg
@@ -175,6 +175,6 @@ nixCmd cmdCfg = withSpinner' ("Running " <> cmd <> " on " <> desc) (Just $ const
         , cfg' ^. nixCommonConfig
         )
     path = commonCfg ^. nixCmdConfig_target . target_path
-    desc = T.pack $ path <> maybe ""
+    desc = T.pack $ fromMaybe "" path <> maybe ""
       (\a -> " [" <> a <> "]")
       (commonCfg ^. nixCmdConfig_target . target_attr)

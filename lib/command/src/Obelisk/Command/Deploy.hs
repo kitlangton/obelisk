@@ -100,7 +100,7 @@ deployPush deployPath getNixBuilders = do
   builders <- getNixBuilders
   buildOutput <- nixCmd $ NixCmd_Build $ def
     & nixCmdConfig_target .~Target
-      { _target_path = srcPath
+      { _target_path = Just srcPath
       , _target_attr = Just "server.system"
       , _target_expr = Nothing
       }
@@ -178,7 +178,7 @@ deployMobile platform mobileArgs = withProjectRoot "." $ \root -> do
     result <- nixCmd $ NixCmd_Build $ def
       & nixBuildConfig_outLink .~ OutLink_None
       & nixCmdConfig_target .~ Target
-        { _target_path = ""
+        { _target_path = Nothing
         , _target_attr = Nothing
         , _target_expr = Just $ "with (import " <> srcDir <> " {}); "  <> platform <> ".frontend.override { releaseKey = { " <> unwords overrides <> " }; }"
         }
