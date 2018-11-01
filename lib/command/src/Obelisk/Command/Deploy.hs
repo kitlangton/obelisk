@@ -176,9 +176,9 @@ deployMobile platform mobileArgs = withProjectRoot "." $ \root -> do
         }
     let overrides = map (\(k,v) -> k <> " = " <> v <> "; ")
           [ ("storeFile", show keystorePath)
-          , ("storePassword", "obelisk")
-          , ("keyAlias", "obelisk")
-          , ("keyPassword", "obelisk")
+          , ("storePassword", show "obelisk")
+          , ("keyAlias", show "obelisk")
+          , ("keyPassword", show "obelisk")
           ]
     result <- nixBuildAttrWithCache srcDir $ platform <> ".frontend.override { releaseKey = { " <> unwords overrides <> " }; }"
     callProcessAndLogOutput (Notice, Error) $ proc (result </> "bin" </> "deploy") mobileArgs
