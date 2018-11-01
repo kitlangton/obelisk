@@ -174,8 +174,12 @@ deployMobile platform mobileArgs = withProjectRoot "." $ \root -> do
         , _keytoolConfig_storepass = "obelisk"
         , _keytoolConfig_dname = "CN=mqttserver.ibm.com, OU=ID, O=IBM, L=Hursley, S=Hants, C=GB" -- TODO Read these from config?
         }
-  result <- nixBuildAttrWithCache srcDir $ platform <> ".frontend"
-  callProcessAndLogOutput (Notice, Error) $ proc (result </> "bin" </> "deploy") mobileArgs
+    let overrides = map (\(k,v) -> k <> " = " <> v <> "; ")
+          [ ("keyStore", show keystorePath)
+          -- , ("keyStorePassword", show "")
+          ]
+    result <- nixBuildAttrWithCache srcDir $ platform <> ".frontend.override { " <> unwords overrides <> " }"
+    callProcessAndLogOutput (Notice, Error) $ proc (result </> "bin" </> "deploy") mobileArgs
 
 data KeytoolConfig = KeytoolConfig
   { _keytoolConfig_keystore :: FilePath
