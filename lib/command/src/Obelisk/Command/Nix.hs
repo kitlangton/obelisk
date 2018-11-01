@@ -44,6 +44,7 @@ import Obelisk.CliApp
 data Target = Target
   { _target_path :: FilePath
   , _target_attr :: Maybe String
+  , _target_expr :: Maybe String
   }
 makeClassy ''Target
 
@@ -51,6 +52,7 @@ instance Default Target where
   def = Target
     { _target_path = "."
     , _target_attr = Nothing
+    , _target_expr = Nothing
     }
 
 data Arg
@@ -83,13 +85,17 @@ instance Default NixCommonConfig where
   def = NixCommonConfig def mempty mempty
 
 runNixCommonConfig :: NixCommonConfig -> [FilePath]
-runNixCommonConfig cfg = mconcat [[path], attrArg, args, buildersArg]
+runNixCommonConfig cfg = mconcat [[path], attrArg, exprArg, args, buildersArg]
   where
     path = _target_path $ _nixCmdConfig_target cfg
     attr = _target_attr $ _nixCmdConfig_target cfg
+    expr = _target_expr $ _nixCmdConfig_target cfg
     attrArg = case attr of
       Nothing -> []
       Just a -> ["-A", a]
+    exprArg = case expr of
+      Nothing -> []
+      Just a -> ["-E", a]
     args = cliFromArgs $ _nixCmdConfig_args cfg
     buildersArg = case _nixCmdConfig_builders cfg of
       [] -> []
