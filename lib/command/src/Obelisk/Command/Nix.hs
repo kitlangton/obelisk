@@ -176,6 +176,7 @@ nixCmd cmdCfg = withSpinner' ("Running " <> cmd <> " on " <> desc) (Just $ const
         , cfg' ^. nixCommonConfig
         )
     path = commonCfg ^. nixCmdConfig_target . target_path
-    desc = T.pack $ fromMaybe "" path <> maybe ""
-      (\a -> " [" <> a <> "]")
-      (commonCfg ^. nixCmdConfig_target . target_attr)
+    desc = T.pack $ mconcat $ catMaybes
+      [ (" on " <>) <$> path
+      , (\a -> " [" <> a <> "]") <$> (commonCfg ^. nixCmdConfig_target . target_attr)
+      ]
