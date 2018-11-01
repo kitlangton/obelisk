@@ -170,12 +170,18 @@ deployMobile platform mobileArgs = withProjectRoot "." $ \root -> do
         , _keytoolConfig_dname = "CN=mqttserver.ibm.com, OU=ID, O=IBM, L=Hursley, S=Hants, C=GB" -- TODO Read these from config?
         }
     let overrides = map (\(k,v) -> k <> " = " <> v <> "; ")
-          [ ("storeFile", show keystorePath)
+          [ ("storeFile", keystorePath)
           , ("storePassword", show "obelisk")
           , ("keyAlias", show "obelisk")
           , ("keyPassword", show "obelisk")
           ]
-    result <- nixBuildAttrWithCache srcDir $ platform <> ".frontend.override { releaseKey = { " <> unwords overrides <> " }; }"
+    result <- nixCmd $ NixCmd_Build $ def
+      & nixBuildConfig_outLink .~ OutLink_None
+      & nixCmdConfig_target .~ Target
+        { _target_path = ""
+        , _target_attr = Nothing
+        , _target_expr = Just $ "with (import " <> srcDir <> " {}); "  <> platform <> ".frontend.override { releaseKey = { " <> unwords overrides <> " }; }"
+        }
     callProcessAndLogOutput (Notice, Error) $ proc (result </> "bin" </> "deploy") mobileArgs
 
 data KeytoolConfig = KeytoolConfig
