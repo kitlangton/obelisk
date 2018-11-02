@@ -12,8 +12,10 @@ import Control.Monad.IO.Class (liftIO)
 import Data.Bits
 import Data.Default
 import Data.List (isSuffixOf)
+import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe
+import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import System.Directory
@@ -169,20 +171,32 @@ deployMobile platform mobileArgs = withProjectRoot "." $ \root -> do
         , _keytoolConfig_storepass = "obelisk"
         , _keytoolConfig_dname = "CN=mqttserver.ibm.com, OU=ID, O=IBM, L=Hursley, S=Hants, C=GB" -- TODO Read these from config?
         }
-    let overrides = map (\(k,v) -> k <> " = " <> v <> "; ")
-          [ ("storeFile", keystorePath)
-          , ("storePassword", show "obelisk")
-          , ("keyAlias", show "obelisk")
-          , ("keyPassword", show "obelisk")
+    let releaseKey = renderAttrset $ Map.fromList
+          [ ("storeFile", Val_Path keystorePath)
+          , ("storePassword", Val_Text "obelisk")
+          , ("keyAlias", Val_Text "obelisk")
+          , ("keyPassword", Val_Text "obelisk")
           ]
     result <- nixCmd $ NixCmd_Build $ def
       & nixBuildConfig_outLink .~ OutLink_None
       & nixCmdConfig_target .~ Target
         { _target_path = Nothing
         , _target_attr = Nothing
-        , _target_expr = Just $ "with (import " <> srcDir <> " {}); "  <> platform <> ".frontend.override { releaseKey = { " <> unwords overrides <> " }; }"
+        , _target_expr = Just $ "with (import " <> srcDir <> " {}); "  <> platform <> ".frontend.override { releaseKey = " <> T.unpack releaseKey <> "; }"
         }
     callProcessAndLogOutput (Notice, Error) $ proc (result </> "bin" </> "deploy") mobileArgs
+
+data Val
+  = Val_Text Text
+  | Val_Path FilePath
+
+renderVal :: Val -> Text
+renderVal = \case
+  Val_Text x -> "\"" <> x <> "\""
+  Val_Path p -> T.pack p
+
+renderAttrset :: Map Text Val -> Text
+renderAttrset m = "{ " <> mconcat (map (\(k,v) -> k <> " = " <> renderVal v <> ";") $ Map.toList m) <> " }"
 
 data KeytoolConfig = KeytoolConfig
   { _keytoolConfig_keystore :: FilePath
