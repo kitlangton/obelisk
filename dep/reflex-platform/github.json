@@ -1,7 +1,7 @@
 {
   "owner": "reflex-frp",
   "repo": "reflex-platform",
-  "branch": "android-tweaks",
-  "rev": "96f05cf3dc34751aae18641f839d16b3d1ae8333",
-  "sha256": "16p51k4w1lzn6z2cf8sc09a452yw4cxgzagn3cnrlq2z9f7caxfj"
+  "branch": "android-buildApp-overridable",
+  "rev": "1c7886dec6ebedecbc078b188311c27e1694cdfa",
+  "sha256": "1w3ka16qsxkilvhvn7vdywhnhaybv6z587rmjbbqz0qmd9rlk8yc"
 }
