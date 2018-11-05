@@ -206,7 +206,7 @@ deployMobile platform mobileArgs = withProjectRoot "." $ \root -> do
       & nixCmdConfig_target .~ Target
         { _target_path = Nothing
         , _target_attr = Nothing
-        , _target_expr = Just $ "with (import " <> srcDir <> " {}); "  <> platform <> ".frontend.override (drv: { releaseKey = (drv.releaseKey or {}) // " <> T.unpack releaseKey <> "; })"
+        , _target_expr = Just $ "with (import " <> srcDir <> " {}); "  <> platform <> ".frontend.override (drv: { releaseKey = (if builtins.isNull drv.releaseKey then {} else drv.releaseKey) // " <> T.unpack releaseKey <> "; })"
         }
     callProcessAndLogOutput (Notice, Error) $ proc (result </> "bin" </> "deploy") mobileArgs
   where
